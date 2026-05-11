@@ -1,129 +1,231 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.util.ArrayList;
 
-public class UserInterface {
-    private JFrame mainFrame;
-    private JPanel mainPanel;
-    private JComboBox<String> eventTypeComboBox;
-    private JTextField venueField, rowField, seatField, eventNameField;
-    private JCheckBox standingCheckBox, backstageCheckBox;
-    private JTextArea ticketsDisplay;
+public class UserInterface extends Frame implements ActionListener {
+
+    private Choice eventTypeChoice;
+
+    private TextField venueField;
+    private TextField rowField;
+    private TextField seatField;
+    private TextField eventNameField;
+
+    private Checkbox standingCheckBox;
+    private Checkbox backstageCheckBox;
+
+    private TextArea ticketsDisplay;
+
+    private Button purchaseButton;
+    private Button viewTicketsButton;
+
     private ArrayList<Ticket> tickets;
 
     public UserInterface() {
+
         tickets = new ArrayList<>();
-        initialize();
-    }
 
-    private void initialize() {
-        mainFrame = new JFrame("Ticket Booking System");
-        mainFrame.setSize(600, 400);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("Ticket Booking System");
+        setSize(700, 500);
+        setLayout(null);
 
-        mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
-
-        JLabel titleLabel = new JLabel("Ticket Booking System", SwingConstants.CENTER);
+        Label titleLabel = new Label("Ticket Booking System", Label.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        titleLabel.setBounds(200, 40, 250, 30);
+        add(titleLabel);
 
-        JPanel inputPanel = new JPanel(new GridLayout(7, 2, 10, 10));
-        inputPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Event Type
+        Label typeLabel = new Label("Event Type:");
+        typeLabel.setBounds(50, 100, 100, 25);
+        add(typeLabel);
 
-        inputPanel.add(new JLabel("Event Type:"));
-        eventTypeComboBox = new JComboBox<>(new String[]{"Theater", "Concert", "Sports"});
-        inputPanel.add(eventTypeComboBox);
+        eventTypeChoice = new Choice();
+        eventTypeChoice.add("Theater");
+        eventTypeChoice.add("Concert");
+        eventTypeChoice.add("Sports");
+        eventTypeChoice.setBounds(200, 100, 150, 25);
+        add(eventTypeChoice);
 
-        inputPanel.add(new JLabel("Venue:"));
-        venueField = new JTextField();
-        inputPanel.add(venueField);
+        // Venue
+        Label venueLabel = new Label("Venue:");
+        venueLabel.setBounds(50, 140, 100, 25);
+        add(venueLabel);
 
-        inputPanel.add(new JLabel("Row (if applicable):"));
-        rowField = new JTextField();
-        inputPanel.add(rowField);
+        venueField = new TextField();
+        venueField.setBounds(200, 140, 150, 25);
+        add(venueField);
 
-        inputPanel.add(new JLabel("Seat Number (if applicable):"));
-        seatField = new JTextField();
-        inputPanel.add(seatField);
+        // Row
+        Label rowLabel = new Label("Row:");
+        rowLabel.setBounds(50, 180, 100, 25);
+        add(rowLabel);
 
-        inputPanel.add(new JLabel("Event Name:"));
-        eventNameField = new JTextField();
-        inputPanel.add(eventNameField);
+        rowField = new TextField();
+        rowField.setBounds(200, 180, 150, 25);
+        add(rowField);
 
-        standingCheckBox = new JCheckBox("Standing Ticket");
-        backstageCheckBox = new JCheckBox("Backstage Pass");
-        inputPanel.add(standingCheckBox);
-        inputPanel.add(backstageCheckBox);
+        // Seat
+        Label seatLabel = new Label("Seat Number:");
+        seatLabel.setBounds(50, 220, 100, 25);
+        add(seatLabel);
 
-        mainPanel.add(inputPanel, BorderLayout.CENTER);
+        seatField = new TextField();
+        seatField.setBounds(200, 220, 150, 25);
+        add(seatField);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton purchaseButton = new JButton("Purchase Ticket");
-        JButton viewTicketsButton = new JButton("View Tickets");
+        // Event Name
+        Label eventNameLabel = new Label("Event Name:");
+        eventNameLabel.setBounds(50, 260, 100, 25);
+        add(eventNameLabel);
 
-        purchaseButton.addActionListener(new PurchaseButtonListener());
-        viewTicketsButton.addActionListener(new ViewTicketsButtonListener());
+        eventNameField = new TextField();
+        eventNameField.setBounds(200, 260, 150, 25);
+        add(eventNameField);
 
-        buttonPanel.add(purchaseButton);
-        buttonPanel.add(viewTicketsButton);
+        // Checkboxes
+        standingCheckBox = new Checkbox("Standing Ticket");
+        standingCheckBox.setBounds(50, 300, 150, 25);
+        add(standingCheckBox);
 
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        backstageCheckBox = new Checkbox("Backstage Pass");
+        backstageCheckBox.setBounds(220, 300, 150, 25);
+        add(backstageCheckBox);
 
-        mainFrame.add(mainPanel);
-        mainFrame.setVisible(true);
+        // Buttons
+        purchaseButton = new Button("Purchase Ticket");
+        purchaseButton.setBounds(50, 350, 140, 35);
+        add(purchaseButton);
+
+        viewTicketsButton = new Button("View Tickets");
+        viewTicketsButton.setBounds(220, 350, 140, 35);
+        add(viewTicketsButton);
+
+        purchaseButton.addActionListener(this);
+        viewTicketsButton.addActionListener(this);
+
+        // Ticket display area
+        ticketsDisplay = new TextArea();
+        ticketsDisplay.setBounds(400, 100, 250, 250);
+        ticketsDisplay.setEditable(false);
+        add(ticketsDisplay);
+
+        // Window closing
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+            }
+        });
+
+        setVisible(true);
     }
 
-    private class PurchaseButtonListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            String eventType = (String) eventTypeComboBox.getSelectedItem();
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == purchaseButton) {
+
+            String eventType = eventTypeChoice.getSelectedItem();
             String venue = venueField.getText();
-            char row = rowField.getText().isEmpty() ? ' ' : rowField.getText().charAt(0);
-            int seat = seatField.getText().isEmpty() ? 0 : Integer.parseInt(seatField.getText());
+
+            char row = rowField.getText().isEmpty()
+                    ? ' '
+                    : rowField.getText().charAt(0);
+
+            int seat = seatField.getText().isEmpty()
+                    ? 0
+                    : Integer.parseInt(seatField.getText());
+
             String eventName = eventNameField.getText();
-            boolean standing = standingCheckBox.isSelected();
-            boolean backstage = backstageCheckBox.isSelected();
+
+            boolean standing = standingCheckBox.getState();
+            boolean backstage = backstageCheckBox.getState();
 
             if (venue.isEmpty() || eventName.isEmpty()) {
-                JOptionPane.showMessageDialog(mainFrame, "Please fill in all required fields.");
+
+                Dialog errorDialog = new Dialog(this, "Error", true);
+                errorDialog.setLayout(new FlowLayout());
+                errorDialog.setSize(250, 100);
+
+                errorDialog.add(new Label("Please fill all required fields"));
+
+                Button ok = new Button("OK");
+                ok.addActionListener(ev -> errorDialog.dispose());
+
+                errorDialog.add(ok);
+
+                errorDialog.setVisible(true);
+
                 return;
             }
 
             Ticket ticket;
-            if ("Theater".equals(eventType)) {
-                ticket = new Theater(venue, row, seat, "" + row + seat, standing, backstage, eventName);
-            } else if ("Concert".equals(eventType)) {
-                ticket = new Concert(venue, row, seat, "" + row + seat, standing, backstage, eventName);
+
+            if (eventType.equals("Theater")) {
+
+                ticket = new Theater(
+                        venue,
+                        row,
+                        seat,
+                        "" + row + seat,
+                        standing,
+                        backstage,
+                        eventName);
+
+            } else if (eventType.equals("Concert")) {
+
+                ticket = new Concert(
+                        venue,
+                        row,
+                        seat,
+                        "" + row + seat,
+                        standing,
+                        backstage,
+                        eventName);
+
             } else {
-                ticket = new Sports(venue, row, seat, "" + row + seat, standing, eventName);
+
+                ticket = new Sports(
+                        venue,
+                        row,
+                        seat,
+                        "" + row + seat,
+                        standing,
+                        eventName);
             }
 
             ticket.adjustPrice();
             tickets.add(ticket);
-            JOptionPane.showMessageDialog(mainFrame, "Ticket purchased successfully! Price: $" + ticket.getPrice());
+
+            Dialog successDialog = new Dialog(this, "Success", true);
+            successDialog.setLayout(new FlowLayout());
+            successDialog.setSize(250, 120);
+
+            successDialog.add(
+                    new Label("Ticket Purchased! Price: $" + ticket.getPrice()));
+
+            Button ok = new Button("OK");
+            ok.addActionListener(ev -> successDialog.dispose());
+
+            successDialog.add(ok);
+
+            successDialog.setVisible(true);
         }
-    }
 
-    private class ViewTicketsButtonListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            JFrame ticketsFrame = new JFrame("Purchased Tickets");
-            ticketsFrame.setSize(400, 300);
+        else if (e.getSource() == viewTicketsButton) {
 
-            ticketsDisplay = new JTextArea(10, 30);
-            ticketsDisplay.setEditable(false);
+            ticketsDisplay.setText("");
+
             for (int i = 0; i < tickets.size(); i++) {
-                ticketsDisplay.append("Ticket #" + (i + 1) + ":\n" + tickets.get(i).getTicketDetails() + "\n\n");
-            }
 
-            JScrollPane scrollPane = new JScrollPane(ticketsDisplay);
-            ticketsFrame.add(scrollPane);
-            ticketsFrame.setVisible(true);
+                ticketsDisplay.append(
+                        "Ticket #" + (i + 1) + "\n"
+                                + tickets.get(i).getTicketDetails()
+                                + "\n\n");
+            }
         }
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new UserInterface());
+        new LoginFrameAWT();
     }
 }
